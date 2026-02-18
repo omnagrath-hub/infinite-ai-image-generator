@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Om's Infinite Free AI Image Generator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            color: white;
+            overflow-x: hidden;
+            background: black;
+        }
+
+        /* Animated Galaxy Background */
+        body::before {
+            content: "";
+            position: fixed;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 20% 30%, #4b0082, transparent 40%),
+                        radial-gradient(circle at 80% 70%, #0000ff, transparent 40%),
+                        radial-gradient(circle at 50% 50%, #8a2be2, transparent 40%);
+            animation: moveGalaxy 20s linear infinite;
+            z-index: -1;
+        }
+
+        @keyframes moveGalaxy {
+            from { transform: translate(0,0) rotate(0deg); }
+            to { transform: translate(-25%, -25%) rotate(360deg); }
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 60px auto;
+            background: rgba(0,0,0,0.6);
+            padding: 30px;
+            border-radius: 20px;
+            backdrop-filter: blur(15px);
+            box-shadow: 0 0 30px rgba(0, 200, 255, 0.5);
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 20px;
+            background: linear-gradient(90deg, #00c6ff, #ff00ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        textarea, input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 10px;
+            border: none;
+        }
+
+        button {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(90deg, #00c6ff, #ff00ff);
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        button:hover {
+            opacity: 0.9;
+        }
+
+        img {
+            margin-top: 20px;
+            max-width: 100%;
+            border-radius: 15px;
+        }
+
+        /* Animated Spinner */
+        .spinner {
+            display: none;
+            margin: 30px auto;
+            border: 6px solid rgba(255,255,255,0.2);
+            border-top: 6px solid #00c6ff;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+
+    <script>
+        function showSpinner() {
+            document.getElementById("spinner").style.display = "block";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <h1>Om's Infinite Free AI Image Generator</h1>
+
+    <form method="POST" enctype="multipart/form-data" onsubmit="showSpinner()">
+        <textarea name="prompt" placeholder="Enter your prompt..." required></textarea>
+        <input type="file" name="image">
+        <button type="submit">Generate Image</button>
+    </form>
+
+    <div id="spinner" class="spinner"></div>
+
+    {% if image_url %}
+        <img src="{{ image_url }}">
+        <br><br>
+        <a href="{{ image_url }}" download="generated.png">
+            <button>Download Image</button>
+        </a>
+    {% endif %}
+</div>
+
+</body>
+</html>
