@@ -1,48 +1,55 @@
 from flask import Flask, render_template, request, send_file
-from openai import OpenAI
-import os
-from werkzeug.utils import secure_filename
-import base64
-from io import BytesIO
+from PIL import Image, ImageDraw
+import numpy as np
+import io
+import random
+import hashlib
 
 app = Flask(__name__)
-client = OpenAI(api_key=os.environ.get("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"))
 
-UPLOAD_FOLDER = "uploads"
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+def generate_image(prompt):
+    seed = int(hashlib.sha256(prompt.encode()).hexdigest(), 16) % (10**8)
+    random.seed(seed)
+    np.random.seed(seed)
+
+    width, height = 512, 512
+
+    noise = np.random.rand(height, width, 3) * 255
+    noise = noise.astype(np.uint8)
+
+    img = Image.fromarray(noise)
+    draw = ImageDraw.Draw(img)
+
+    # Stars
+    for _ in range(400):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        size = random.randint(1, 2)
+        draw.ellipse((x, y, x+size, y+size), fill=(255, 255, 255))
+
+    # Glow nebula
+    for _ in range(6):
+        x = random.randint(0, width)
+        y = random.randint(0, height)
+        r = random.randint(80, 200)
+        color = tuple(np.random.randint(50, 255, size=3))
+        draw.ellipse((x-r, y-r, x+r, y+r), fill=color)
+
+    return img
 
 @app.route("/", methods=["GET", "POST"])
 def index():
-    image_url = None
-
     if request.method == "POST":
-        prompt = request.form.get("prompt")
-        file = request.files.get("image")
+        prompt = request.form["prompt"]
+        img = generate_image(prompt)
 
-        if file and file.filename != "":
-            filename = secure_filename(file.filename)
-            filepath = os.path.join(UPLOAD_FOLDER, filename)
-            file.save(filepath)
+        img_io = io.BytesIO()
+        img.save(img_io, "PNG")
+        img_io.seek(0)
 
-            with open(filepath, "rb") as img:
-                img_base64 = base64.b64encode(img.read()).decode("utf-8")
+        return send_file(img_io, mimetype="image/png")
 
-            response = client.images.edit(
-                model="gpt-image-1",
-                prompt=prompt,
-                image=img_base64
-            )
-        else:
-            response = client.images.generate(
-                model="gpt-image-1",
-                prompt=prompt
-            )
-
-        image_base64 = response.data[0].b64_json
-        image_bytes = base64.b64decode(image_base64)
-        image_url = "data:image/png;base64," + image_base64
-
-    return render_template("index.html", image_url=image_url)
+    return render_template("index.html")
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()

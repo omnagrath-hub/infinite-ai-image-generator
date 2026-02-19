@@ -1,4 +1,4 @@
 flask
-openai
+Pillow
+numpy
 gunicorn
-werkzeug
