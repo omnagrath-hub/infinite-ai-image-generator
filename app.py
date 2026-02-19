@@ -6,7 +6,7 @@ import base64
 from io import BytesIO
 
 app = Flask(__name__)
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=os.environ.get("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"))
 
 UPLOAD_FOLDER = "uploads"
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
